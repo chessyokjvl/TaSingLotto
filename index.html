@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เลขเด็ดคำนวณตามสูตรตาสิงห์</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-gray-100 p-4 md:p-10">
+
+    <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+        <h1 class="text-2xl font-bold mb-6 text-center text-blue-600">โปรแกรมคำนวณเลข</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <input type="number" id="threeDigits" placeholder="เลขท้าย 3 ตัว (เช่น 495)" class="border p-2 rounded">
+            <input type="number" id="twoDigits" placeholder="เลขท้าย 2 ตัว (เช่น 62)" class="border p-2 rounded">
+        </div>
+        
+        <button onclick="calculate()" class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">Generate เลข</button>
+
+        <div id="result" class="mt-8 hidden">
+            <h2 class="font-bold text-lg mb-2">ผลลัพธ์:</h2>
+            <div id="output" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+        </div>
+    </div>
+
+    <script>
+        function getNumbers(start, isTwoDigit) {
+            let matrix = [];
+            for (let i = 0; i < 3; i++) {
+                let row = [];
+                for (let j = 0; j < 10; j++) {
+                    let val = (parseInt(start.toString()[i % start.toString().length]) + j + (i === 2 && isTwoDigit ? 1 : 0)) % 10;
+                    row.push(val);
+                }
+                matrix.push(row);
+            }
+            // Logic ดึงตำแหน่งที่ระบุ
+            return [matrix[0][3], matrix[0][7], matrix[1][0], matrix[1][4], matrix[1][8], matrix[2][3], matrix[2][7]];
+        }
+
+        function calculate() {
+            const three = document.getElementById('threeDigits').value;
+            const two = document.getElementById('twoDigits').value;
+
+            if (three.length !== 3 || two.length !== 2) {
+                Swal.fire('ข้อผิดพลาด', 'กรุณากรอกเลขให้ครบตามหลัก', 'error');
+                return;
+            }
+
+            const set1 = getNumbers(three, false);
+            const set2 = getNumbers(two, true);
+
+            let html = `<div class="p-4 bg-gray-50 rounded"><strong>ชุดที่ 1:</strong> ${set1.join(', ')}</div>`;
+            html += `<div class="p-4 bg-gray-50 rounded"><strong>ชุดที่ 2:</strong> ${set2.join(', ')}</div>`;
+            
+            // สร้างเลข 3 ตัวจากการจับคู่ (ตัวอย่าง: set1[0] + set2)
+            let combos = [];
+            set1.forEach(s1 => {
+                set2.forEach(s2 => {
+                    combos.push(`${s1}${s2}`);
+                });
+            });
+
+            html += `<div class="col-span-2 mt-4"><h3 class="font-bold">เลขที่เป็นไปได้ (2 ตัวท้ายจาก 7x7):</h3>
+                     <p class="text-sm break-words">${combos.join(', ')}</p></div>`;
+
+            document.getElementById('output').innerHTML = html;
+            document.getElementById('result').classList.remove('hidden');
+            Swal.fire('สำเร็จ', 'คำนวณเรียบร้อยแล้ว', 'success');
+        }
+    </script>
+</body>
+</html>
