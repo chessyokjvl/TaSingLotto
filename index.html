@@ -3,41 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>เลขเด็ดคำนวณตามสูตรตาสิงห์</title>
+    <title>โปรแกรมตารางเลข Tic-Tac-Toe</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        /* CSS เพิ่มเติมสำหรับเส้นตาราง Tic-Tac-Toe ให้ดูสวยงาม */
+        .tictactoe-cell {
+            width: 3rem;
+            height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #1f2937;
+        }
+        .cell-1 { border-right: 2px solid #374151; border-bottom: 2px solid #374151; }
+        .cell-2 { border-bottom: 2px solid #374151; }
+        .cell-3 { border-left: 2px solid #374151; border-bottom: 2px solid #374151; }
+        .cell-4 { border-right: 2px solid #374151; border-bottom: 2px solid #374151; }
+        .cell-5 { border-bottom: 2px solid #374151; }
+        .cell-6 { border-left: 2px solid #374151; border-bottom: 2px solid #374151; }
+        .cell-7 { border-right: 2px solid #374151; }
+        .cell-8 { }
+        .cell-9 { border-left: 2px solid #374151; }
+    </style>
 </head>
-<body class="bg-gray-100 p-4 md:p-10">
+<body class="bg-gray-100 p-4 md:p-10 font-sans">
 
-    <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-lg">
-        <h1 class="text-2xl font-bold mb-6 text-center text-blue-600">โปรแกรมคำนวณเลข</h1>
+    <div class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-lg">
+        <h1 class="text-3xl font-bold mb-8 text-center text-indigo-700">คำนวณสูตรตารางตัดสลับ</h1>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <input type="number" id="threeDigits" placeholder="เลขท้าย 3 ตัว (เช่น 495)" class="border p-2 rounded">
-            <input type="number" id="twoDigits" placeholder="เลขท้าย 2 ตัว (เช่น 62)" class="border p-2 rounded">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">เลขท้าย 3 ตัว (รางวัลที่ 1)</label>
+                <input type="number" id="threeDigits" placeholder="เช่น 495" class="w-full border-2 border-gray-300 p-3 rounded-lg focus:outline-none focus:border-indigo-500">
+            </div>
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">เลขท้าย 2 ตัว</label>
+                <input type="number" id="twoDigits" placeholder="เช่น 62" class="w-full border-2 border-gray-300 p-3 rounded-lg focus:outline-none focus:border-indigo-500">
+            </div>
         </div>
         
-        <button onclick="calculate()" class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">Generate เลข</button>
+        <button onclick="calculate()" class="w-full bg-indigo-600 text-white font-bold p-3 rounded-lg hover:bg-indigo-700 transition duration-200 shadow-md">Generate เลข</button>
 
-        <div id="result" class="mt-8 hidden">
-            <h2 class="font-bold text-lg mb-2">ผลลัพธ์:</h2>
-            <div id="output" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+        <div id="result" class="mt-10 hidden">
+            <h2 class="text-xl font-bold mb-6 text-center border-b pb-2 text-gray-800">ผลลัพธ์ตาราง 7 ตัว</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div class="flex flex-col items-center">
+                    <h3 class="font-bold text-lg mb-4 text-indigo-600">ชุดที่ 1</h3>
+                    <div id="grid1" class="grid grid-cols-3 w-max mx-auto"></div>
+                </div>
+                
+                <div class="flex flex-col items-center">
+                    <h3 class="font-bold text-lg mb-4 text-indigo-600">ชุดที่ 2</h3>
+                    <div id="grid2" class="grid grid-cols-3 w-max mx-auto"></div>
+                </div>
+            </div>
+
+            <div class="mt-12">
+                <h2 class="text-xl font-bold mb-4 border-b pb-2 text-gray-800">ชุดตัวเลข 3 หลัก (สลับตำแหน่งตามเส้นตาราง)</h2>
+                <div id="combinationsOutput" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    </div>
+            </div>
         </div>
     </div>
 
     <script>
+        // ฟังก์ชันคำนวณหาเลข 7 ตัวตามตำแหน่ง
         function getNumbers(start, isTwoDigit) {
             let matrix = [];
+            let startStr = start.toString();
             for (let i = 0; i < 3; i++) {
                 let row = [];
+                let baseDigit = parseInt(startStr[i % startStr.length]);
                 for (let j = 0; j < 10; j++) {
-                    let val = (parseInt(start.toString()[i % start.toString().length]) + j + (i === 2 && isTwoDigit ? 1 : 0)) % 10;
+                    let val = (baseDigit + j + (i === 2 && isTwoDigit ? 1 : 0)) % 10;
                     row.push(val);
                 }
                 matrix.push(row);
             }
-            // Logic ดึงตำแหน่งที่ระบุ
+            // รีเทิร์น Array 7 ตัว: [แถว1ซ้าย, แถว1ขวา, แถว2ซ้าย, แถว2กลาง, แถว2ขวา, แถว3ซ้าย, แถว3ขวา]
             return [matrix[0][3], matrix[0][7], matrix[1][0], matrix[1][4], matrix[1][8], matrix[2][3], matrix[2][7]];
+        }
+
+        // ฟังก์ชันสร้าง HTML สำหรับตาราง Tic-Tac-Toe
+        function renderGrid(numbers) {
+            return `
+                <div class="tictactoe-cell cell-1">${numbers[0]}</div>
+                <div class="tictactoe-cell cell-2"></div>
+                <div class="tictactoe-cell cell-3">${numbers[1]}</div>
+                
+                <div class="tictactoe-cell cell-4">${numbers[2]}</div>
+                <div class="tictactoe-cell cell-5">${numbers[3]}</div>
+                <div class="tictactoe-cell cell-6">${numbers[4]}</div>
+                
+                <div class="tictactoe-cell cell-7">${numbers[5]}</div>
+                <div class="tictactoe-cell cell-8"></div>
+                <div class="tictactoe-cell cell-9">${numbers[6]}</div>
+            `;
+        }
+
+        // ฟังก์ชันสลับตำแหน่งเลข (Permutation) เพื่อให้ได้ครบทุกรูปแบบ
+        function getPermutations(arr) {
+            let result = [];
+            const permute = (current, remaining) => {
+                if (remaining.length === 0) {
+                    result.push(current.join(''));
+                    return;
+                }
+                for (let i = 0; i < remaining.length; i++) {
+                    let nextCurrent = current.concat(remaining[i]);
+                    let nextRemaining = remaining.slice(0, i).concat(remaining.slice(i + 1));
+                    permute(nextCurrent, nextRemaining);
+                }
+            };
+            permute([], arr);
+            return [...new Set(result)]; // กรองตัวซ้ำออก
+        }
+
+        // ดึงชุดเลข 3 ตัวจากเส้นต่างๆ ในตาราง (แนวนอน, แนวตั้ง, แนวทแยง)
+        function extractLines(nums) {
+            return [
+                [nums[2], nums[3], nums[4]], // แนวนอน (บรรทัด 2)
+                [nums[0], nums[2], nums[5]], // แนวตั้งซ้าย
+                [nums[1], nums[4], nums[6]], // แนวตั้งขวา
+                [nums[0], nums[3], nums[6]], // ทแยงมุม ซ้ายบน-ขวาล่าง
+                [nums[1], nums[3], nums[5]]  // ทแยงมุม ขวาบน-ซ้ายล่าง
+            ];
         }
 
         function calculate() {
@@ -45,30 +139,39 @@
             const two = document.getElementById('twoDigits').value;
 
             if (three.length !== 3 || two.length !== 2) {
-                Swal.fire('ข้อผิดพลาด', 'กรุณากรอกเลขให้ครบตามหลัก', 'error');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'ข้อมูลไม่ถูกต้อง',
+                    text: 'กรุณากรอกเลขท้าย 3 ตัว และเลขท้าย 2 ตัว ให้ครบถ้วน'
+                });
                 return;
             }
 
             const set1 = getNumbers(three, false);
             const set2 = getNumbers(two, true);
 
-            let html = `<div class="p-4 bg-gray-50 rounded"><strong>ชุดที่ 1:</strong> ${set1.join(', ')}</div>`;
-            html += `<div class="p-4 bg-gray-50 rounded"><strong>ชุดที่ 2:</strong> ${set2.join(', ')}</div>`;
-            
-            // สร้างเลข 3 ตัวจากการจับคู่ (ตัวอย่าง: set1[0] + set2)
-            let combos = [];
-            set1.forEach(s1 => {
-                set2.forEach(s2 => {
-                    combos.push(`${s1}${s2}`);
-                });
+            // วาดตาราง
+            document.getElementById('grid1').innerHTML = renderGrid(set1);
+            document.getElementById('grid2').innerHTML = renderGrid(set2);
+
+            // ดึงเส้นและสลับตำแหน่งตัวเลข
+            let allLines = [...extractLines(set1), ...extractLines(set2)];
+            let combosHtml = '';
+
+            allLines.forEach((line, index) => {
+                let perms = getPermutations(line);
+                combosHtml += `
+                    <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-100 shadow-sm">
+                        <strong class="text-indigo-800 block mb-2">กลุ่มชุดที่ ${index + 1} (${line.join('-')}):</strong>
+                        <div class="text-gray-700 tracking-wider">
+                            ${perms.join(', ')}
+                        </div>
+                    </div>
+                `;
             });
 
-            html += `<div class="col-span-2 mt-4"><h3 class="font-bold">เลขที่เป็นไปได้ (2 ตัวท้ายจาก 7x7):</h3>
-                     <p class="text-sm break-words">${combos.join(', ')}</p></div>`;
-
-            document.getElementById('output').innerHTML = html;
+            document.getElementById('combinationsOutput').innerHTML = combosHtml;
             document.getElementById('result').classList.remove('hidden');
-            Swal.fire('สำเร็จ', 'คำนวณเรียบร้อยแล้ว', 'success');
         }
     </script>
 </body>
